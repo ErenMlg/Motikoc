@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "730340142591",
+    "project_id": "motikoc-adb84",
+    "storage_bucket": "motikoc-adb84.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:730340142591:android:b1bd3b6e263509adbb8bca",
+        "android_client_info": {
+          "package_name": "com.softcross.motikoc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "730340142591-bbe2inhlp3nor6mmevsffnrm6ubk46v6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2Kl3P_u_B1CstlFEDRzDlgfJIfQwxcmY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "730340142591-bbe2inhlp3nor6mmevsffnrm6ubk46v6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

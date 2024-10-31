@@ -1,0 +1,30 @@
+<resources>
+    <string name="app_name">Motikoc</string>
+    <string name="introduction_title">Motikoç ile sınava en iyi şekilde hazırlan!</string>
+    <string name="register_subtitle">Motikoç\'a kaydol ve kariyerini planla, motikoc ile motive ol!</string>
+    <string name="do_you_have_acc_login">Hesabın var mı? Giriş yap!</string>
+    <string name="register">Kayıt Ol</string>
+    <string name="introduction_subtitle">Motikoç ile sana en uygun mesleği seç ve kariyerine yön ver!</string>
+    <string name="sign_with_google">Google ile giriş yap</string>
+    <string name="sign">Kayıt ol</string>
+    <string name="login">Giriş yap</string>
+    <string name="login_subtitle">Motikoça hoşgeldin, hesabına giriş yapıp programını takip et!</string>
+    <string name="lets_register">Hesabın yok mu? Hemen kayıt ol!</string>
+    <string name="password">Şifre</string>
+    <string name="email">Email</string>
+    <string name="confirm_password">Şifre Onayı</string>
+    <string name="fullname">Ad Soyad</string>
+    <string name="job_wizard">Meslek Sihirbazı</string>
+    <string name="str_password_validation_title">Şifre içermeli;</string>
+    <string name="str_password_validation_one">en az 8 karakter</string>
+    <string name="str_password_validation_two">en az bir rakam</string>
+    <string name="str_password_validation_three">en az bir küçük harf</string>
+    <string name="str_password_validation_four">en az bir büyük harf</string>
+    <string name="job_wizard_introduction">Motikoç olarak sana en uygun mesleği bulabilmen için aşağıdaki soruları yanıtlamanı istiyoruz.</string>
+    <string name="job_wizard_interests">Seni daha iyi tanıyabilmemiz için ilgi alanlarını belirtmeni istiyoruz.</string>
+    <string name="job_wizard_abilities">Seni daha iyi tanıyabilmemiz için yeteneklerini belirtmeni istiyoruz.</string>
+    <string name="job_wizard_personal">Seni daha iyi tanıyabilmemiz için kişisel özelliklerini belirtmeni istiyoruz.</string>
+    <string name="job_wizard_area">Seni daha iyi tanıyabilmemiz için hangi alana daha yatkın olduğunu belirtmeni istiyoruz.</string>
+    <string name="job_wizard_identify">Sana uygun mesleği belirlemek için kendinden bahsetmene ihtiyacımız var</string>
+    <string name="job_recommend_result">Verdiğiniz bilgilere göre size en uygun meslekler!</string>
+</resources>
