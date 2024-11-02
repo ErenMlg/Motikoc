@@ -88,7 +88,7 @@ fun JobWizard(
 
     LaunchedEffect(currentPage) {
         state.animateScrollToPage(currentPage)
-        if(currentPage != 0){
+        if (currentPage != 0) {
             focusManager.moveFocus(FocusDirection.Next)
         }
     }
@@ -231,9 +231,7 @@ fun JobWizardInterests(
     var selectionSize by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(selectionSize) {
-        if (selectionSize > 0) {
-            verticalScroll.scrollTo(selectionSize)
-        }
+        verticalScroll.scrollTo(selectionSize)
     }
 
     Column(
@@ -303,6 +301,7 @@ fun JobWizardSkills(
 ) {
     val verticalScroll = rememberScrollState()
     var selectionSize by remember { mutableIntStateOf(0) }
+
     LaunchedEffect(selectionSize) {
         if (selectionSize > 0) {
             verticalScroll.scrollTo(selectionSize)

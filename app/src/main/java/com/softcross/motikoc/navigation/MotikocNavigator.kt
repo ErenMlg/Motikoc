@@ -9,7 +9,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.google.gson.Gson
+import com.softcross.motikoc.presentation.assignments.AssignmentViewModel
+import com.softcross.motikoc.presentation.assignments.Assignments
+import com.softcross.motikoc.presentation.exams.Exams
+import com.softcross.motikoc.presentation.exams.ExamsViewModel
 import com.softcross.motikoc.presentation.home.Home
+import com.softcross.motikoc.presentation.home.HomeViewModel
 import com.softcross.motikoc.presentation.introduction.IntroductionRoute
 import com.softcross.motikoc.presentation.jobAssistant.AssistantJobItem
 import com.softcross.motikoc.presentation.jobAssistant.JobAssistant
@@ -20,6 +25,8 @@ import com.softcross.motikoc.presentation.jobWizard.JobWizard
 import com.softcross.motikoc.presentation.jobWizard.JobWizardViewModel
 import com.softcross.motikoc.presentation.login.LoginRoute
 import com.softcross.motikoc.presentation.login.LoginViewModel
+import com.softcross.motikoc.presentation.planner.Planner
+import com.softcross.motikoc.presentation.planner.PlannerViewModel
 import com.softcross.motikoc.presentation.register.RegisterRoute
 import com.softcross.motikoc.presentation.register.RegisterViewModel
 import com.softcross.motikoc.presentation.splash.Splash
@@ -183,7 +190,61 @@ fun MotikocNavigator(
         }
 
         composable(Home.route) {
-            Home()
+            val viewModel: HomeViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
+            Home(
+                uiState = uiState,
+                uiEffect = uiEffect,
+                onAction = viewModel::onAction,
+                navigateToIntroduce = {
+                    navHostController.navigate(Introduction.route) {
+                        popUpTo(Home.route) { inclusive = true }
+                    }
+                },
+                navigateToPlans = {
+                    navHostController.navigate(Planner.route)
+                },
+                navigateToAssignments = {
+                    navHostController.navigate(Assignments.route)
+                },
+                navigateToExams = {
+                    navHostController.navigate(Exams.route)
+                }
+            )
+        }
+
+        composable(Planner.route) {
+            val viewModel: PlannerViewModel = hiltViewModel()
+            val uiState by viewModel.plannerState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.plannerEffect
+            Planner(
+                uiState = uiState,
+                uiEffect = uiEffect,
+                onAction = viewModel::onAction
+            )
+        }
+
+        composable(Assignments.route){
+            val viewModel: AssignmentViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
+            Assignments(
+                uiState = uiState,
+                uiEffect = uiEffect,
+                onAction = viewModel::onAction
+            )
+        }
+
+        composable(Exams.route){
+            val viewModel: ExamsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
+            Exams(
+                uiState = uiState,
+                uiEffect = uiEffect,
+                onEvent = viewModel::onEvent
+            )
         }
 
     }

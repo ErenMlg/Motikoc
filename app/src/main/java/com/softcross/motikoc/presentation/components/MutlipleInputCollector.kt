@@ -43,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
@@ -99,7 +100,7 @@ fun MultipleInputCollector(
                 value = word,
                 onValueChange = {
                     word = it
-                    isExpand = it.isNotEmpty()
+                    isExpand = true
                 },
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
@@ -136,6 +137,7 @@ fun MultipleInputCollector(
                 },
                 modifier = Modifier
                     .focusRequester(focusRequester)
+                    .onFocusEvent { isExpand = it.isFocused }
                     .then(
                         if (taggedWords.isNotEmpty()) {
                             Modifier.width(100.dp)
@@ -186,14 +188,12 @@ fun MultipleInputCollector(
                         }
                     ) {
                         ItemsCategory(title = it) { title ->
-                            isExpand = false
                             onAdd(title)
                             word = ""
                         }
                     }
                     item {
                         ItemsCategory(title = "Add") {
-                            isExpand = false
                             if (!taggedWords.contains(word)) {
                                 onAdd(word)
                             }
@@ -244,7 +244,7 @@ fun MultipleInputSelector(
                 value = word,
                 onValueChange = {
                     word = it
-                    isExpand = it.isNotEmpty()
+                    isExpand = true
                 },
                 singleLine = true,
                 colors = TextFieldDefaults.colors(
@@ -281,6 +281,7 @@ fun MultipleInputSelector(
                 },
                 modifier = Modifier
                     .focusRequester(focusRequester)
+                    .onFocusEvent { isExpand = it.isFocused }
                     .then(
                         if (taggedWords.isNotEmpty()) {
                             Modifier.width(100.dp)
@@ -307,12 +308,7 @@ fun MultipleInputSelector(
         }
 
         AnimatedVisibility(
-            visible = isExpand && (dataList.contains(word) || dataList.any {
-                it.startsWith(
-                    word,
-                    ignoreCase = true
-                )
-            }),
+            visible = isExpand,
             modifier = Modifier.graphicsLayer { translationX = textFieldPositionX }) {
             Card(
                 modifier = Modifier
@@ -336,7 +332,6 @@ fun MultipleInputSelector(
                         }
                     ) {
                         ItemsCategory(title = it) { title ->
-                            isExpand = false
                             onAdd(title)
                             word = ""
                         }

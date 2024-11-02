@@ -58,6 +58,7 @@ import com.softcross.motikoc.presentation.theme.TextColor
 fun IconTextField(
     modifier: Modifier = Modifier,
     givenValue: String,
+    enabled: Boolean = true,
     placeHolder: String,
     onValueChange: (String) -> Unit,
     leadingIcon: @Composable (() -> Unit)? = null,
@@ -69,10 +70,11 @@ fun IconTextField(
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
     ) {
         TextField(
+            enabled = enabled,
             value = givenValue,
             visualTransformation = visualTransformation,
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
@@ -84,9 +86,12 @@ fun IconTextField(
                 unfocusedIndicatorColor = GoldColor,
                 focusedIndicatorColor = GoldColor,
                 errorIndicatorColor = GoldColor,
+                disabledIndicatorColor = GoldColor,
+                disabledContainerColor = PrimarySurface,
                 unfocusedContainerColor = PrimarySurface,
                 focusedContainerColor = PrimarySurface,
                 errorContainerColor = PrimarySurface,
+                disabledTextColor = TextColor,
                 focusedTextColor = TextColor,
                 unfocusedTextColor = TextColor,
                 cursorColor = GoldColor,
@@ -102,11 +107,12 @@ fun IconTextField(
                 Text(
                     text = placeHolder,
                     fontFamily = PoppinsLight,
-                    fontSize = 16.sp,
-                    color = TextColor
+                    color = TextColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             },
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .shadow(3.dp, shape = RoundedCornerShape(8.dp))
         )

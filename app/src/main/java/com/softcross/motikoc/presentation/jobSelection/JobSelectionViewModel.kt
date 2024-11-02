@@ -93,6 +93,8 @@ class JobSelectionViewModel @Inject constructor(
             is UiAction.SelectJob -> {
                 selectJob(action.job)
             }
+
+            UiAction.TryAgain -> sendPrompt()
         }
     }
 
@@ -145,6 +147,8 @@ class JobSelectionViewModel @Inject constructor(
 
     private fun selectJob(job: JobRecommend) = viewModelScope.launch {
         firebaseRepository.addJobToFirestore(job.name, MotikocSingleton.getUserID())
+        val user = firebaseRepository.getUserDetailFromFirestore()
+        MotikocSingleton.setUser(user)
         emitUiEffect(UiEffect.NavigateToHome)
     }
 

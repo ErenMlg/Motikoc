@@ -1,6 +1,7 @@
 package com.softcross.motikoc.presentation.jobSelection
 
 import android.content.res.Configuration
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -121,7 +122,30 @@ fun JobSelection(
                     color = TextColor,
                     modifier = Modifier.fillMaxWidth(0.6f)
                 )
-            } else {
+            } else if (errorMessage.isNotEmpty()) {
+                Image(
+                    painter = painterResource(id = R.drawable.icon_error),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .size(200.dp)
+                        .clip(CircleShape)
+                        .background(DarkSurface.copy(0.5f)),
+                )
+                Text(
+                    text = "Bir hata oluştu. Lütfen tekrar deneyin.",
+                    fontFamily = PoppinsLight,
+                    textAlign = TextAlign.Center,
+                    fontSize = 16.sp,
+                    color = TextColor,
+                    modifier = Modifier.fillMaxWidth(0.6f)
+                )
+                FilledButton(
+                    text = "Tekrar dene",
+                    modifier = Modifier,
+                    onClick = { onAction(UiAction.TryAgain) }
+                )
+            }else{
                 JobSelectionContent(
                     jobRecommendations = uiState.jobRecommendList,
                     onReRecommend = { onAction(UiAction.ReSendPrompt) },
@@ -129,15 +153,6 @@ fun JobSelection(
                     onSelectJob = { onAction(UiAction.SelectJob(it)) }
                 )
             }
-        }
-        if (errorMessage.isNotEmpty()) {
-            MotikocSnackbar(
-                message = errorMessage,
-                type = SnackbarType.ERROR,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter),
-                clear = { errorMessage = "" }
-            )
         }
     }
 

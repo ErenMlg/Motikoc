@@ -1,5 +1,7 @@
 package com.softcross.motikoc.common
 
+import com.softcross.motikoc.common.extensions.calculateLevel
+import com.softcross.motikoc.domain.model.Assignment
 import com.softcross.motikoc.domain.model.MotikocUser
 
 object MotikocSingleton {
@@ -10,12 +12,41 @@ object MotikocSingleton {
         currentMotikocUser = user
     }
 
+    fun changeAssignmentHistory(assignment: List<Assignment>) {
+        currentMotikocUser = currentMotikocUser?.let {
+            it.copy(
+                assignmentHistory = assignment
+            )
+        }
+    }
+
+    fun clearUser() {
+        currentMotikocUser = null
+    }
+
     fun getUser(): MotikocUser? {
         return currentMotikocUser
     }
 
+    fun getUserName(): String {
+        return currentMotikocUser?.fullName ?: ""
+    }
+
+    fun getUserTotalXP(): Int {
+        return currentMotikocUser?.totalXP ?: 0
+    }
+
     fun getUserID(): String {
         return currentMotikocUser?.id ?: ""
+    }
+
+    fun updateUserXP(xp: Int) {
+        currentMotikocUser =currentMotikocUser?.let {
+            it.copy(
+                totalXP =  xp,
+                levelInfo = calculateLevel(xp)
+            )
+        }
     }
 
     fun changeUserInformations(

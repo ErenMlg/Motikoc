@@ -79,6 +79,8 @@ class JobAssistantViewModel @Inject constructor(
             uiState.value.selectedJob?.name ?: "",
             MotikocSingleton.getUserID()
         )
+        val user = firebaseRepository.getUserDetailFromFirestore()
+        MotikocSingleton.setUser(user)
         emitUiEffect(UiEffect.NavigateToHome)
     }
 

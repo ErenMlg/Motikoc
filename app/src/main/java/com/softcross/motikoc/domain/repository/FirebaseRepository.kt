@@ -1,7 +1,12 @@
 package com.softcross.motikoc.domain.repository
 
+import com.google.android.gms.common.api.Response
 import com.softcross.motikoc.common.ResponseState
+import com.softcross.motikoc.domain.model.Assignment
+import com.softcross.motikoc.domain.model.ExamItem
 import com.softcross.motikoc.domain.model.MotikocUser
+import com.softcross.motikoc.domain.model.PlannerItem
+import java.time.LocalDate
 
 interface FirebaseRepository {
 
@@ -19,9 +24,23 @@ interface FirebaseRepository {
 
     suspend fun getUserDetailFromFirestore(): MotikocUser
 
+    suspend fun getAssignmentsFromFirestore(userID: String): List<Assignment>
+
     suspend fun addJobToFirestore(jobTitle: String, userID: String)
 
     suspend fun addPersonalInfosToFirestore(userID: String, personalProperties: String, interests: String, abilities: String, area: String, identify: String)
+
+    suspend fun addAssignmentToFirestore(userID: String, assignment: Assignment) : Assignment
+
+    suspend fun updateAssignmentToFirestore(userID: String, assignment: Assignment)
+
+    suspend fun addXpToUser(userID: String, totalXP: Int)
+
+    suspend fun addPlanToFirestore(userID: String, plannerItem: PlannerItem)
+
+    suspend fun getPlansFromFirestore(userID: String, date:LocalDate): ResponseState<List<PlannerItem>>
+
+    suspend fun addExamToFirestore(userID: String, examItem: ExamItem)
 
     fun signOutUser()
 }

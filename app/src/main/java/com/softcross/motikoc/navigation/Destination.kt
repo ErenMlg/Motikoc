@@ -51,3 +51,15 @@ object JobAssistant : Destination {
 object Home : Destination {
     override val route = "home"
 }
+
+object Planner : Destination {
+    override val route = "planner"
+}
+
+object Assignments : Destination {
+    override val route = "assignments"
+}
+
+object Exams : Destination {
+    override val route = "exams"
+}

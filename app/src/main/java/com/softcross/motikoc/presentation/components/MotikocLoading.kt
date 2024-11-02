@@ -16,7 +16,8 @@ import com.softcross.motikoc.R
 fun MotikocLottieAnimation(
     modifier: Modifier = Modifier,
     @RawRes rawRes: Int = R.raw.loading,
-    iterations: Int = LottieConstants.IterateForever
+    iterations: Int = LottieConstants.IterateForever,
+    contentScale: ContentScale = ContentScale.Fit,
 ) {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(rawRes))
     val progress by animateLottieCompositionAsState(
@@ -24,6 +25,7 @@ fun MotikocLottieAnimation(
         iterations = iterations,
     )
     LottieAnimation(
+        contentScale = contentScale,
         modifier = modifier,
         composition = composition,
         progress = { progress },

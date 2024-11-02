@@ -31,7 +31,7 @@ fun MotikocAsyncImage(
         contentScale = contentScale,
         loading = {
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                painter = painterResource(id = R.drawable.icon_loading),
                 contentScale = FixedScale(4f),
                 colorFilter = ColorFilter.tint(Color.DarkGray),
                 contentDescription = "Loading"

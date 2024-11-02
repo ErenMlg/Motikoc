@@ -83,6 +83,7 @@ object JobSelectionContract {
     sealed class UiAction {
         data object ReSendPrompt : UiAction()
         data class SelectJob(val job:JobRecommend) : UiAction()
+        data object TryAgain : UiAction()
     }
 
     sealed class UiEffect {
