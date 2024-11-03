@@ -37,6 +37,7 @@ object AssignmentContract {
 
             işte daha önce verdiğin görevler (Bu görevlerden farklı görevler vermeni istiyorum);
         """.trimIndent(),
+        val totalXP: Int = 0
     )
 
     sealed class AssignmentAction {

@@ -44,10 +44,11 @@ object HomeContract {
             Senden türkiye'de yaşayan YKS sınavına hazırlanan bir lise öğrencisi için öğrencinin özelliklerini incelemeni ve onu motivasyon cümlesi kurmanı istiyorum bu motivasyon cümlesi sınav kaygısını azaltacak, psikolojik olarak rahatlatacak ve hedefine yönelik inancı arttıracak biçimde olsun, cevap olarak sadece motivasyon cümlesi ver, motivasyon cümlesini sanki bir psikolog söylüyor gibi ver
 
             Analiz edebilmen için öğrencinin bilgilerini veriyorum;
-            Hedef mesleğim: Çocuk Gelişim Uzmanı
-            Hedef üniversitem: Kırklareli Üniversitesi
-            Hedef bölüm: Çocuk Gelişimi
-            Hedef puan: 110.000
+            Hedef mesleğim: ${MotikocSingleton.getUser()?.dreamJob ?: "Daha belirlemedim"}
+            Hedef üniversitem: ${MotikocSingleton.getUser()?.dreamUniversity ?: "Daha belirlemedim"}
+            Hedef bölüm: ${MotikocSingleton.getUser()?.dreamDepartment ?: "Daha belirlemedim"}
+            Hedef puan: ${MotikocSingleton.getUser()?.dreamPoint ?: "Daha belirlemedim"}
+            Hedef sıralamam: ${MotikocSingleton.getUser()?.dreamRank ?: "Daha belirlemedim"}
             ilgi alanları: Çocuk Gelişimi,Sağlık,Eğitim ve Pedagoji
             kişisel özellikleri: içerik üretme,Mantıklı,Problem Çözme Odaklı
             yeteneklerim: Araştırma,yazma,okuma

@@ -3,7 +3,7 @@ package com.softcross.motikoc.domain.model
 import java.time.LocalDate
 
 data class ExamItem(
-    val examID: Int = 0,
+    val examID: String = "",
     val examName: String,
     val examDate: LocalDate,
     val examTime: String,

@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.softcross.motikoc.common.MotikocSingleton
 import com.softcross.motikoc.common.MotikocSingleton.updateUserXP
 import com.softcross.motikoc.common.ResponseState
-import com.softcross.motikoc.common.extensions.getCurrentDateTime
 import com.softcross.motikoc.domain.model.Assignment
 import com.softcross.motikoc.domain.repository.FirebaseRepository
 import com.softcross.motikoc.domain.repository.GeminiRepository
@@ -38,7 +37,12 @@ class AssignmentViewModel @Inject constructor(
     val uiEffect: Flow<AssignmentEffect> by lazy { _uiEffect.receiveAsFlow() }
 
     init {
-        getAssignments()
+        updateUiState { copy(totalXP = MotikocSingleton.getUserTotalXP()) }
+        if (MotikocSingleton.getUser()?.assignmentHistory?.isEmpty() == true) {
+            getAssignments()
+        }else{
+            updateUiState { copy(assignments = MotikocSingleton.getUser()?.assignmentHistory ?: emptyList()) }
+        }
     }
 
     fun onAction(action: AssignmentAction) {
@@ -49,9 +53,12 @@ class AssignmentViewModel @Inject constructor(
     }
 
     private fun finishAssignment(assignment: Assignment) = viewModelScope.launch {
-        val totalXP = MotikocSingleton.getUserTotalXP()
-        updateUserXP(totalXP+assignment.assignmentXP)
-        val updatedAssignment = assignment.copy(isCompleted = true)
+        val updatedAssignment = assignment.copy(isCompleted = !assignment.isCompleted)
+        if (updatedAssignment.isCompleted) {
+            updateUiState { copy(totalXP = totalXP + assignment.assignmentXP) }
+        } else {
+            updateUiState { copy(totalXP = totalXP - assignment.assignmentXP) }
+        }
         val index =
             uiState.value.assignments.indexOfFirst { it.assignmentID == assignment.assignmentID }
         if (index != -1) {
@@ -64,13 +71,15 @@ class AssignmentViewModel @Inject constructor(
                 )
             }
         }
+        MotikocSingleton.changeAssignmentHistory(uiState.value.assignments)
         firebaseRepository.updateAssignmentToFirestore(
             MotikocSingleton.getUserID(),
             updatedAssignment
         )
-        firebaseRepository.addXpToUser(
+        updateUserXP(uiState.value.totalXP)
+        firebaseRepository.changeUserXP(
             MotikocSingleton.getUserID(),
-            totalXP+assignment.assignmentXP
+            uiState.value.totalXP
         )
     }
 
@@ -80,8 +89,6 @@ class AssignmentViewModel @Inject constructor(
             val oldAssignments = user.assignmentHistory.filter {
                 it.dueDate.isAfter(LocalDateTime.now().withHour(0).withMinute(0).withSecond(0))
             }
-            Log.e("oldAssignments", oldAssignments.toString())
-            Log.e("oldAssignmentsNOT", user.assignmentHistory.toString())
             if (oldAssignments.isEmpty()) {
                 updateUiState {
                     copy(
@@ -99,8 +106,14 @@ class AssignmentViewModel @Inject constructor(
                                         user.id,
                                         assignment
                                     )
-                                    updateUiState { copy(assignments = assignments + newAssignment, isLoading = false) }
+                                    updateUiState {
+                                        copy(
+                                            assignments = assignments + newAssignment,
+                                            isLoading = false
+                                        )
+                                    }
                                 }
+                                MotikocSingleton.changeAssignmentHistory(uiState.value.assignments)
                             }
 
                             is ResponseState.Error -> {

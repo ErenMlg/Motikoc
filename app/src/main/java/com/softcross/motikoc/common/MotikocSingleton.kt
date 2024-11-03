@@ -1,8 +1,11 @@
 package com.softcross.motikoc.common
 
+import android.util.Log
 import com.softcross.motikoc.common.extensions.calculateLevel
+import com.softcross.motikoc.domain.model.AIExamAnalyzeResult
 import com.softcross.motikoc.domain.model.Assignment
 import com.softcross.motikoc.domain.model.MotikocUser
+import com.softcross.motikoc.domain.model.PlannerItem
 
 object MotikocSingleton {
 
@@ -10,6 +13,42 @@ object MotikocSingleton {
 
     fun setUser(user: MotikocUser) {
         currentMotikocUser = user
+    }
+
+    fun getAIAnalysisResult(): AIExamAnalyzeResult? {
+        return currentMotikocUser?.aiExamAnalyze
+    }
+
+    fun changeAIAnalysisResult(aiExamAnalyzeResult: AIExamAnalyzeResult) {
+        currentMotikocUser = currentMotikocUser?.let {
+            it.copy(
+                aiExamAnalyze = aiExamAnalyzeResult
+            )
+        }
+    }
+
+    fun changeSchedule(schedule: List<PlannerItem>) {
+        currentMotikocUser = currentMotikocUser?.let {
+            it.copy(
+                schedule = schedule
+            )
+        }
+    }
+
+    fun addSchedule(schedule: PlannerItem) {
+        currentMotikocUser = currentMotikocUser?.let {
+            it.copy(
+                schedule = it.schedule + schedule
+            )
+        }
+    }
+
+    fun changeMotivationMessage(message: String) {
+        currentMotikocUser = currentMotikocUser?.let {
+            it.copy(
+                motivationMessage = message
+            )
+        }
     }
 
     fun changeAssignmentHistory(assignment: List<Assignment>) {

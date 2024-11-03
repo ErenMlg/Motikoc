@@ -1,6 +1,7 @@
 package com.softcross.motikoc.domain.repository
 
 import com.softcross.motikoc.common.ResponseState
+import com.softcross.motikoc.domain.model.AIExamAnalyzeResult
 import com.softcross.motikoc.domain.model.Assignment
 import com.softcross.motikoc.domain.model.ChatItem
 import com.softcross.motikoc.domain.model.JobRecommend
@@ -15,4 +16,6 @@ interface GeminiRepository {
     fun sendAssignmentQuestion(message: String): Flow<ResponseState<List<Assignment>>>
 
     fun sendMotivationQuestion(message: String): Flow<ResponseState<String>>
+
+    fun sendAIAnalyzeRequest(message: String): Flow<ResponseState<AIExamAnalyzeResult>>
 }

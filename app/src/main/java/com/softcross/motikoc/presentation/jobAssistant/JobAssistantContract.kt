@@ -26,6 +26,6 @@ object JobAssistantContract {
     }
 
     sealed class UiEffect {
-        data object NavigateToHome : UiEffect()
+        data object NavigateToGoals : UiEffect()
     }
 }

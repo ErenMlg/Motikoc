@@ -51,8 +51,6 @@ import com.softcross.motikoc.presentation.components.FilledButton
 import com.softcross.motikoc.presentation.components.MotikocAsyncImage
 import com.softcross.motikoc.presentation.components.MotikocHeader
 import com.softcross.motikoc.presentation.components.MotikocLottieAnimation
-import com.softcross.motikoc.presentation.components.MotikocSnackbar
-import com.softcross.motikoc.presentation.components.SnackbarType
 import com.softcross.motikoc.presentation.jobSelection.JobSelectionContract.UiAction
 import com.softcross.motikoc.presentation.jobSelection.JobSelectionContract.UiEffect
 import com.softcross.motikoc.presentation.jobSelection.JobSelectionContract.UiState
@@ -74,7 +72,7 @@ fun JobSelection(
     uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
     navigateToAssistant: (JobRecommend) -> Unit,
-    navigateToHome: () -> Unit
+    navigateToGoals: () -> Unit
 ) {
     var errorMessage by remember { mutableStateOf("") }
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -82,8 +80,8 @@ fun JobSelection(
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             uiEffect.collect { effect ->
                 when (effect) {
-                    is UiEffect.NavigateToHome -> {
-                        navigateToHome()
+                    is UiEffect.NavigateToGoals -> {
+                        navigateToGoals()
                     }
 
                     is UiEffect.ShowSnackbar -> {
@@ -373,7 +371,7 @@ fun JobSelectionPreviewDark() {
             uiEffect = emptyFlow(),
             onAction = {},
             navigateToAssistant = {},
-            navigateToHome = {}
+            navigateToGoals = {}
         )
     }
 }
@@ -410,7 +408,7 @@ fun JobSelectionPreviewLight() {
             uiEffect = emptyFlow(),
             onAction = {},
             navigateToAssistant = {},
-            navigateToHome = {}
+            navigateToGoals = {}
         )
     }
 }

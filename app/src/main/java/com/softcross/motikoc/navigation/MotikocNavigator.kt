@@ -13,6 +13,8 @@ import com.softcross.motikoc.presentation.assignments.AssignmentViewModel
 import com.softcross.motikoc.presentation.assignments.Assignments
 import com.softcross.motikoc.presentation.exams.Exams
 import com.softcross.motikoc.presentation.exams.ExamsViewModel
+import com.softcross.motikoc.presentation.goals.Goals
+import com.softcross.motikoc.presentation.goals.GoalsViewModel
 import com.softcross.motikoc.presentation.home.Home
 import com.softcross.motikoc.presentation.home.HomeViewModel
 import com.softcross.motikoc.presentation.introduction.IntroductionRoute
@@ -63,6 +65,11 @@ fun MotikocNavigator(
                     navHostController.navigate(JobWizard.route) {
                         popUpTo(Splash.route) { inclusive = true }
                     }
+                },
+                navigateToGoals = {
+                    navHostController.navigate(Goals.route) {
+                        popUpTo(Splash.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -102,6 +109,11 @@ fun MotikocNavigator(
                     navHostController.navigate(Home.route) {
                         popUpTo(Login.route) { inclusive = true }
                     }
+                },
+                navigateToGoals = {
+                    navHostController.navigate(Goals.route) {
+                        popUpTo(Login.route) { inclusive = true }
+                    }
                 }
             )
         }
@@ -124,6 +136,11 @@ fun MotikocNavigator(
                         popUpTo(navHostController.graph.id) {
                             inclusive = true
                         }
+                    }
+                },
+                navigateToGoal = {
+                    navHostController.navigate(Goals.route) {
+                        popUpTo(Register.route) { inclusive = true }
                     }
                 }
             )
@@ -162,8 +179,8 @@ fun MotikocNavigator(
                 navigateToAssistant = { clickedJob ->
                     navHostController.navigate("${JobAssistant.route}/$jobNamesJson/${clickedJob.name}")
                 },
-                navigateToHome = {
-                    navHostController.navigate(Home.route) {
+                navigateToGoals = {
+                    navHostController.navigate(Goals.route) {
                         popUpTo(JobSelection.route) { inclusive = true }
                     }
                 }
@@ -181,9 +198,25 @@ fun MotikocNavigator(
                 navigateToJobSelection = {
                     navHostController.popBackStack()
                 },
+                navigateToGoals = {
+                    navHostController.navigate(Goals.route) {
+                        popUpTo(JobAssistant.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Goals.route) {
+            val viewModel: GoalsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+            val uiEffect = viewModel.uiEffect
+            Goals(
+                uiState = uiState,
+                uiEffect = uiEffect,
+                uiAction = viewModel::onAction,
                 navigateToHome = {
                     navHostController.navigate(Home.route) {
-                        popUpTo(JobAssistant.route) { inclusive = true }
+                        popUpTo(Goals.route) { inclusive = true }
                     }
                 }
             )
@@ -204,12 +237,6 @@ fun MotikocNavigator(
                 },
                 navigateToPlans = {
                     navHostController.navigate(Planner.route)
-                },
-                navigateToAssignments = {
-                    navHostController.navigate(Assignments.route)
-                },
-                navigateToExams = {
-                    navHostController.navigate(Exams.route)
                 }
             )
         }
@@ -225,7 +252,7 @@ fun MotikocNavigator(
             )
         }
 
-        composable(Assignments.route){
+        composable(Assignments.route) {
             val viewModel: AssignmentViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect
@@ -236,7 +263,7 @@ fun MotikocNavigator(
             )
         }
 
-        composable(Exams.route){
+        composable(Exams.route) {
             val viewModel: ExamsViewModel = hiltViewModel()
             val uiState by viewModel.uiState.collectAsStateWithLifecycle()
             val uiEffect = viewModel.uiEffect

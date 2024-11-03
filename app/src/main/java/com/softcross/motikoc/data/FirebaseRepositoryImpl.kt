@@ -9,6 +9,7 @@ import com.softcross.motikoc.common.ResponseState
 import com.softcross.motikoc.common.extensions.calculateLevel
 import com.softcross.motikoc.common.extensions.stringToLocalDate
 import com.softcross.motikoc.common.extensions.stringToLocalDateTime
+import com.softcross.motikoc.common.extensions.toLessonItem
 import com.softcross.motikoc.domain.model.Assignment
 import com.softcross.motikoc.domain.model.ExamItem
 import com.softcross.motikoc.domain.model.MotikocUser
@@ -108,25 +109,18 @@ class FirebaseRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAssignmentsFromFirestore(userID: String): List<Assignment> {
-        val assignmentsSnapshot =
-            firebaseFirestore.collection("Assignments").whereEqualTo("userID", userID).get().await()
-        if (!assignmentsSnapshot.isEmpty) {
-            val assignments = mutableListOf<Assignment>()
-            assignmentsSnapshot.forEach { snapshot ->
-                val assignment = Assignment(
-                    assignmentID = snapshot.id,
-                    assignmentName = snapshot.data["assignmentName"].toString(),
-                    assignmentDetail = snapshot.data["assignmentDetail"].toString(),
-                    assignmentXP = snapshot.data["assignmentXP"].toString().toInt(),
-                    dueDate = stringToLocalDateTime(snapshot.data["dateTime"].toString()),
-                    isCompleted = snapshot.data["isAssignmentCompleted"].toString().toBoolean()
-                )
-                assignments.add(assignment)
-            }
-            return assignments
-        }
-        return emptyList()
+
+    override suspend fun changeUserXP(userID: String, totalXP: Int) {
+        val firebaseUsers =
+            firebaseFirestore.collection("Users").document(userID)
+        firebaseUsers.set(
+            hashMapOf(
+                "totalXP" to totalXP
+            ),
+            SetOptions.merge()
+        ).addOnFailureListener {
+            throw Exception(it.message)
+        }.await()
     }
 
     override suspend fun addJobToFirestore(jobTitle: String, userID: String) {
@@ -134,6 +128,27 @@ class FirebaseRepositoryImpl @Inject constructor(
         firestoreUsers.set(
             hashMapOf(
                 "dreamJob" to jobTitle
+            ),
+            SetOptions.merge()
+        ).addOnFailureListener {
+            throw Exception(it.message)
+        }.await()
+    }
+
+    override suspend fun addDreamsToFirestore(
+        userID: String,
+        dreamUniversity: String,
+        dreamDepartment: String,
+        dreamPoint: String,
+        dreamRank: String
+    ) {
+        val firestoreUsers = firebaseFirestore.collection("Users").document(userID)
+        firestoreUsers.set(
+            hashMapOf(
+                "dreamUniversity" to dreamUniversity,
+                "dreamDepartment" to dreamDepartment,
+                "dreamPoint" to dreamPoint.toInt(),
+                "dreamRank" to dreamRank
             ),
             SetOptions.merge()
         ).addOnFailureListener {
@@ -185,6 +200,27 @@ class FirebaseRepositoryImpl @Inject constructor(
         return assignment.copy(assignmentID = documentReference.id)
     }
 
+    override suspend fun getAssignmentsFromFirestore(userID: String): List<Assignment> {
+        val assignmentsSnapshot =
+            firebaseFirestore.collection("Assignments").whereEqualTo("userID", userID).get().await()
+        if (!assignmentsSnapshot.isEmpty) {
+            val assignments = mutableListOf<Assignment>()
+            assignmentsSnapshot.forEach { snapshot ->
+                val assignment = Assignment(
+                    assignmentID = snapshot.id,
+                    assignmentName = snapshot.data["assignmentName"].toString(),
+                    assignmentDetail = snapshot.data["assignmentDetail"].toString(),
+                    assignmentXP = snapshot.data["assignmentXP"].toString().toInt(),
+                    dueDate = stringToLocalDateTime(snapshot.data["dateTime"].toString()),
+                    isCompleted = snapshot.data["isAssignmentCompleted"].toString().toBoolean()
+                )
+                assignments.add(assignment)
+            }
+            return assignments
+        }
+        return emptyList()
+    }
+
     override suspend fun updateAssignmentToFirestore(userID: String, assignment: Assignment) {
         try {
             val firebaseAssignment =
@@ -200,19 +236,6 @@ class FirebaseRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             throw Exception(e.message)
         }
-    }
-
-    override suspend fun addXpToUser(userID: String, totalXP: Int) {
-        val firebaseUsers =
-            firebaseFirestore.collection("Users").document(userID)
-        firebaseUsers.set(
-            hashMapOf(
-                "totalXP" to totalXP
-            ),
-            SetOptions.merge()
-        ).addOnFailureListener {
-            throw Exception(it.message)
-        }.await()
     }
 
     override suspend fun addPlanToFirestore(userID: String, plannerItem: PlannerItem) {
@@ -241,7 +264,7 @@ class FirebaseRepositoryImpl @Inject constructor(
     override suspend fun getPlansFromFirestore(
         userID: String,
         date: LocalDate
-    ): ResponseState<List<PlannerItem>> {
+    ): List<PlannerItem> {
         return try {
             val planSnapshot = firebaseFirestore.collection("Planner")
                 .whereEqualTo("userID", MotikocSingleton.getUserID())
@@ -270,12 +293,13 @@ class FirebaseRepositoryImpl @Inject constructor(
                         )
                     )
                 }
-                ResponseState.Success(plans.filter { it.plannerDate.stringToLocalDate("MM-dd-yyyy") == date })
+                MotikocSingleton.changeSchedule(plans)
+                plans.filter { it.plannerDate.stringToLocalDate("MM-dd-yyyy") == date }
             } else {
-                ResponseState.Error(Exception("No plans found"))
+                emptyList()
             }
         } catch (e: Exception) {
-            ResponseState.Error(e)
+            throw Exception(e)
         }
     }
 
@@ -307,6 +331,38 @@ class FirebaseRepositoryImpl @Inject constructor(
             Log.e("FirebaseRepositoryImpl", it.message.toString())
             throw Exception(it.message)
         }.await()
+    }
+
+    override suspend fun getExamsFromFirestore(userID: String): List<ExamItem> {
+        val examsSnapshot = firebaseFirestore.collection("Exams").whereEqualTo("userID", userID)
+            .get().await()
+        if (!examsSnapshot.isEmpty) {
+            val exams = mutableListOf<ExamItem>()
+            examsSnapshot.forEach { snapshot ->
+                val examItem = ExamItem(
+                    examID = snapshot.id,
+                    examName = snapshot.data["examName"].toString(),
+                    examDate = snapshot.data["examDate"].toString().stringToLocalDate("yyyy-MM-dd"),
+                    questionCount = snapshot.data["questionCount"].toString().toInt(),
+                    examTime = snapshot.data["examTime"].toString(),
+                    turkishLessonItem = (snapshot.data["turkishLesson"] as HashMap<*,*>).toLessonItem(),
+                    historyLessonItem = (snapshot.data["historyLesson"]  as HashMap<*,*>).toLessonItem(),
+                    geographyLessonItem = (snapshot.data["geographyLesson"]  as HashMap<*,*>).toLessonItem(),
+                    philosophyLessonItem = (snapshot.data["philosophyLesson"]  as HashMap<*,*>).toLessonItem(),
+                    religionLessonItem = (snapshot.data["religionLesson"]  as HashMap<*,*>).toLessonItem(),
+                    mathLessonItem = (snapshot.data["mathLesson"]  as HashMap<*,*>).toLessonItem(),
+                    geometryLessonItem = (snapshot.data["geometryLesson"]  as HashMap<*,*>).toLessonItem(),
+                    physicsLessonItem = (snapshot.data["physicsLesson"]  as HashMap<*,*>).toLessonItem(),
+                    chemistryLessonItem = (snapshot.data["chemistryLesson"]  as HashMap<*,*>).toLessonItem(),
+                    biologyLessonItem = (snapshot.data["biologyLesson"]  as HashMap<*,*>).toLessonItem(),
+                    net = snapshot.data["net"].toString().toFloat()
+                )
+                exams.add(examItem)
+            }
+            return exams
+        }else{
+            throw Exception("Exams not found")
+        }
     }
 
     override fun signOutUser() = firebaseAuth.signOut()

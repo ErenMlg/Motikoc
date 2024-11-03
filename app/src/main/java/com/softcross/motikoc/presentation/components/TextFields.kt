@@ -183,9 +183,11 @@ fun TextFieldWithoutError(
 fun IdentifyTextField(
     modifier: Modifier = Modifier,
     focusRequester: FocusRequester,
+    keyboardType: KeyboardType = KeyboardType.Text,
     givenValue: String,
     onValueChange: (String) -> Unit,
     placeHolder: String,
+    wantedLength: Int = 20,
     errorField: @Composable AnimatedVisibilityScope.() -> Unit,
 ) {
     Column(
@@ -195,6 +197,9 @@ fun IdentifyTextField(
     ) {
         TextFieldInnerPadding(
             value = givenValue,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = keyboardType,
+            ),
             onValueChange = onValueChange,
             singleLine = false,
             colors = TextFieldDefaults.colors(
@@ -228,7 +233,7 @@ fun IdentifyTextField(
                 .focusRequester(focusRequester)
         )
         AnimatedVisibility(
-            visible = givenValue.length < 20,
+            visible = givenValue.length < wantedLength && givenValue.isNotEmpty(),
             enter = slideInVertically() + expandVertically() + fadeIn(),
             exit = slideOutVertically() + shrinkVertically() + fadeOut(),
         ) {

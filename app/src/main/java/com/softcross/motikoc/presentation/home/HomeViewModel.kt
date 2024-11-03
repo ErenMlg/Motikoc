@@ -6,10 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.softcross.motikoc.common.MotikocSingleton
 import com.softcross.motikoc.common.MotikocSingleton.updateUserXP
 import com.softcross.motikoc.common.ResponseState
-import com.softcross.motikoc.common.extensions.getCurrentDateTime
-import com.softcross.motikoc.common.extensions.getMonthMaxDay
+import com.softcross.motikoc.common.extensions.stringToLocalDate
 import com.softcross.motikoc.domain.model.Assignment
-import com.softcross.motikoc.domain.model.MotikocUser
 import com.softcross.motikoc.domain.repository.FirebaseRepository
 import com.softcross.motikoc.domain.repository.GeminiRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,7 +23,6 @@ import javax.inject.Inject
 import com.softcross.motikoc.presentation.home.HomeContract.UiState
 import com.softcross.motikoc.presentation.home.HomeContract.UiEffect
 import com.softcross.motikoc.presentation.home.HomeContract.UiAction
-import com.softcross.motikoc.presentation.planner.PlannerContract.PlannerEffect
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -43,8 +40,35 @@ class HomeViewModel @Inject constructor(
     val uiEffect: Flow<UiEffect> by lazy { _uiEffect.receiveAsFlow() }
 
     init {
-        getUserInfo()
-        initData()
+        val localDate = LocalDate.now()
+        updateUiState {
+            copy(
+                selectedDay = localDate,
+                days = listOf(
+                    localDate,
+                    localDate.plusDays(1),
+                    localDate.plusDays(2),
+                    localDate.plusDays(3),
+                    localDate.plusDays(4),
+                    localDate.plusDays(5),
+                    localDate.plusDays(6)
+                )
+            )
+        }
+        val user = MotikocSingleton.getUser()
+        if (user?.assignmentHistory?.isEmpty() == true || user?.motivationMessage?.isEmpty() == true) {
+            getUserInfo()
+            initData()
+        } else {
+            updateUiState {
+                copy(
+                    assignments = user?.assignmentHistory ?: emptyList(),
+                    plannerItems = user?.schedule?.filter { it.plannerDate.stringToLocalDate("MM-dd-yyyy") == localDate }
+                        ?: emptyList(),
+                    motivationMessage = user?.motivationMessage ?: ""
+                )
+            }
+        }
     }
 
     fun onAction(action: UiAction) {
@@ -68,25 +92,22 @@ class HomeViewModel @Inject constructor(
 
     private fun getDayPlans() = viewModelScope.launch {
         updateUiState { copy(plannerLoading = true) }
-        when (val response = firebaseRepository.getPlansFromFirestore(
-            MotikocSingleton.getUserID(),
-            uiState.value.selectedDay
-        )) {
-            is ResponseState.Error -> {
-                updateUiState {
-                    copy(
-                        plannerLoading = false,
-                        errorMessage = response.exception.message
-                            ?: "Bir hata oluştu, planlarınızı gösteremiyoruz."
-                    )
-                }
+        try {
+            val response = firebaseRepository.getPlansFromFirestore(
+                MotikocSingleton.getUserID(),
+                uiState.value.selectedDay
+            )
+            updateUiState { copy(plannerItems = response, plannerLoading = false, isLoading = false) }
+        } catch (e: Exception) {
+            updateUiState {
+                copy(
+                    plannerLoading = false,
+                    errorMessage = e.message
+                        ?: "Bir hata oluştu, planlarınızı gösteremiyoruz."
+                )
             }
-
-            is ResponseState.Success -> {
-                updateUiState { copy(plannerItems = response.result, plannerLoading = false) }
-            }
-
-            is ResponseState.Loading -> {}
+        } finally {
+            updateUiState { copy(plannerLoading = false, isLoading = false) }
         }
     }
 
@@ -102,7 +123,20 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun finishAssignment(assignment: Assignment) = viewModelScope.launch {
-        val updatedAssignment = assignment.copy(isCompleted = true)
+        val updatedAssignment = assignment.copy(isCompleted = !assignment.isCompleted)
+        if (updatedAssignment.isCompleted) {
+            updateUiState {
+                copy(
+                    totalUserXP = totalUserXP + assignment.assignmentXP
+                )
+            }
+        } else {
+            updateUiState {
+                copy(
+                    totalUserXP = totalUserXP - assignment.assignmentXP
+                )
+            }
+        }
         val index =
             uiState.value.assignments.indexOfFirst { it.assignmentID == assignment.assignmentID }
         if (index != -1) {
@@ -112,15 +146,15 @@ class HomeViewModel @Inject constructor(
             updateUiState {
                 copy(
                     assignments = updatedAssignments,
-                    totalUserXP = totalUserXP + assignment.assignmentXP
                 )
             }
         }
+        MotikocSingleton.changeAssignmentHistory(uiState.value.assignments)
         firebaseRepository.updateAssignmentToFirestore(
             MotikocSingleton.getUserID(),
             updatedAssignment
         )
-        firebaseRepository.addXpToUser(
+        firebaseRepository.changeUserXP(
             MotikocSingleton.getUserID(),
             uiState.value.totalUserXP
         )
@@ -129,23 +163,8 @@ class HomeViewModel @Inject constructor(
 
 
     private fun initData() {
-        val localDate = LocalDate.now()
-        updateUiState {
-            copy(
-                isLoading = true, errorMessage = "", selectedDay = localDate,
-                days = listOf(
-                    localDate,
-                    localDate.plusDays(1),
-                    localDate.plusDays(2),
-                    localDate.plusDays(3),
-                    localDate.plusDays(4),
-                    localDate.plusDays(5),
-                    localDate.plusDays(6)
-                )
-            )
-        }
+        updateUiState { copy(isLoading = true, errorMessage = "") }
         MotikocSingleton.getUser()?.let {
-            println(it)
             updateUiState {
                 copy(
                     motivationPrompt = motivationPrompt +
@@ -160,9 +179,7 @@ class HomeViewModel @Inject constructor(
                 )
             }
         }
-        getDayPlans()
         getAssignments()
-        getMotivationMessage()
     }
 
     private fun getAssignments() = viewModelScope.launch {
@@ -171,7 +188,6 @@ class HomeViewModel @Inject constructor(
             val oldAssignments = user.assignmentHistory.filter {
                 it.dueDate.isAfter(LocalDateTime.now().withHour(0).withMinute(0).withSecond(0))
             }
-            println(oldAssignments)
             if (oldAssignments.isEmpty()) {
                 updateUiState {
                     copy(
@@ -191,10 +207,12 @@ class HomeViewModel @Inject constructor(
                                     )
                                     updateUiState { copy(assignments = assignments + newAssignment) }
                                 }
-                                MotikocSingleton.changeAssignmentHistory(firebaseRepository.getAssignmentsFromFirestore(user.id))
-                                if (uiState.value.motivationMessage.isNotEmpty()) {
-                                    updateUiState { copy(isLoading = false) }
-                                }
+                                MotikocSingleton.changeAssignmentHistory(
+                                    firebaseRepository.getAssignmentsFromFirestore(
+                                        user.id
+                                    )
+                                )
+                                getMotivationMessage()
                             }
 
                             is ResponseState.Error -> {
@@ -212,9 +230,7 @@ class HomeViewModel @Inject constructor(
                     }
             } else {
                 updateUiState { copy(assignments = oldAssignments) }
-                if (uiState.value.motivationMessage.isNotEmpty()) {
-                    updateUiState { copy(isLoading = false) }
-                }
+                getMotivationMessage()
             }
         }
     }
@@ -226,9 +242,8 @@ class HomeViewModel @Inject constructor(
                     is ResponseState.Success -> {
                         val motivationMessage = response.result
                         updateUiState { copy(motivationMessage = motivationMessage) }
-                        if (uiState.value.assignments.isNotEmpty()) {
-                            updateUiState { copy(isLoading = false) }
-                        }
+                        MotikocSingleton.changeMotivationMessage(motivationMessage)
+                        getDayPlans()
                     }
 
                     is ResponseState.Error -> {

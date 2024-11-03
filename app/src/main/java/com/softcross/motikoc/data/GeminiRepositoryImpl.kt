@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.softcross.motikoc.common.ResponseState
 import com.softcross.motikoc.common.extensions.getCurrentDateTime
+import com.softcross.motikoc.domain.model.AIExamAnalyzeResult
 import com.softcross.motikoc.domain.model.Assignment
 import com.softcross.motikoc.domain.model.ChatItem
 import com.softcross.motikoc.domain.model.JobRecommend
@@ -103,7 +104,6 @@ class GeminiRepositoryImpl @Inject constructor(
                                     jsonResponse,
                                     object : TypeToken<List<Assignment>>() {}.type
                                 ).map { it.copy(assignmentID = "", dueDate = getCurrentDateTime().plusDays(1)) }
-                            println(assignmentsResponse)
                             emit(ResponseState.Success(assignmentsResponse))
                             success = true
                         } catch (e: Exception) {
@@ -132,6 +132,55 @@ class GeminiRepositoryImpl @Inject constructor(
                 emit(ResponseState.Success(response.text.toString()))
             } catch (e: Exception) {
                 emit(ResponseState.Error(e))
+            }
+        }
+    }
+
+    override fun sendAIAnalyzeRequest(message: String): Flow<ResponseState<AIExamAnalyzeResult>> {
+        return flow {
+            emit(ResponseState.Loading)
+            val maxRetries = 3
+            var attempt = 0
+            var success = false
+
+            while (attempt < maxRetries && !success) {
+                try {
+
+                    val response = generativeModel.generateContent(message)
+                    println("Response:${response.text}")
+                    if (response.text.isNullOrBlank()) {
+                        emit(ResponseState.Error(Exception("An error occurred")))
+                        return@flow
+                    } else {
+                        val jsonResponse = response.text!!.substringAfter("```JSON")
+                            .substringAfter("```json")
+                            .substringAfter("Response:")
+                            .substringBefore("```")
+                            .trim()
+                        println("\nClear Response:${response.text}")
+                        try {
+                            val gson = Gson()
+                            val assignmentsResponse: AIExamAnalyzeResult =
+                                gson.fromJson<AIExamAnalyzeResult>(
+                                    jsonResponse,
+                                    object : TypeToken<AIExamAnalyzeResult>() {}.type
+                                )
+                            println(assignmentsResponse)
+                            emit(ResponseState.Success(assignmentsResponse))
+                            success = true
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            attempt++
+                        }
+                    }
+                } catch (e: Exception) {
+                    emit(ResponseState.Error(e))
+                    return@flow
+                }
+            }
+
+            if (!success) {
+                emit(ResponseState.Error(Exception("Failed to parse JSON after $maxRetries attempts")))
             }
         }
     }

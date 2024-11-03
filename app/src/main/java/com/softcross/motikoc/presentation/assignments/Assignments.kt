@@ -63,8 +63,7 @@ fun Assignments(
     uiEffect: Flow<AssignmentEffect>,
     onAction: (AssignmentAction) -> Unit,
 ) {
-
-    val userLevelInfo = calculateLevel(MotikocSingleton.getUserTotalXP())
+    val userLevelInfo = calculateLevel(uiState.totalXP)
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(uiEffect, lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {

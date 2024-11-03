@@ -5,5 +5,6 @@ object SplashContract {
         data object NavigateToHome : UiEffect()
         data object NavigateToIntroduce : UiEffect()
         data object NavigateToJobWizard : UiEffect()
+        data object NavigateToGoals : UiEffect()
     }
 }

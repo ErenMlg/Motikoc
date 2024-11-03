@@ -69,15 +69,15 @@ fun JobAssistant(
     uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
     navigateToJobSelection: () -> Unit,
-    navigateToHome: () -> Unit
+    navigateToGoals: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(uiEffect, lifecycleOwner) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
             uiEffect.collect { effect ->
                 when (effect) {
-                    UiEffect.NavigateToHome -> {
-                        navigateToHome()
+                    UiEffect.NavigateToGoals -> {
+                        navigateToGoals()
                     }
                 }
             }
@@ -429,7 +429,7 @@ fun JobAssistantPreviewLight() {
             uiEffect = emptyFlow(),
             onAction = {},
             navigateToJobSelection = {},
-            navigateToHome = {}
+            navigateToGoals = {}
         )
     }
 }
@@ -456,7 +456,7 @@ fun JobAssistantPreviewDark() {
             uiEffect = emptyFlow(),
             onAction = {},
             navigateToJobSelection = {},
-            navigateToHome = {}
+            navigateToGoals = {}
         )
     }
 }

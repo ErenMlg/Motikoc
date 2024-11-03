@@ -1,5 +1,7 @@
 package com.softcross.motikoc.presentation.exams
 
+import com.softcross.motikoc.common.MotikocSingleton
+import com.softcross.motikoc.domain.model.AIExamAnalyzeResult
 import com.softcross.motikoc.domain.model.ExamItem
 import com.softcross.motikoc.domain.model.LessonItem
 import java.time.LocalDate
@@ -7,6 +9,7 @@ import java.time.LocalDate
 object ExamsContract {
     data class ExamState(
         val isLoading: Boolean = false,
+        val isExamsLoading: Boolean = false,
         val exams: List<ExamItem> = emptyList(),
         val turkishLessonItem: LessonItem? = null,
         val historyLessonItem: LessonItem? = null,
@@ -19,10 +22,45 @@ object ExamsContract {
         val chemistryLessonItem: LessonItem? = null,
         val biologyLessonItem: LessonItem? = null,
         val examName: String = "",
-        val examDate:LocalDate? = null,
+        val examDate: LocalDate? = null,
         val questionCount: Int = 0,
-        val questionTime: String ="",
-        val isEnable:Boolean = false
+        val questionTime: String = "",
+        val isEnable: Boolean = false,
+        val requestCount: Int = 0,
+        val aiPrompt: String = """
+            YKS deneme sınavı sonuçlarını analiz et ve öneriler sun.
+            Lütfen aşağıdaki JSON formatında yanıt ver: dönen JSON düzgün olmalı özel karekter içermemeli.
+          {
+            "genel_analiz": {
+                "güçlü_yönler": ["madde1", "madde2"],
+                "gelişim_alanları": ["madde1", "madde2"],
+                "sıralama_tahmini": "tahmin_detayı"
+            },
+            "ders_analizleri": [
+                  {
+                    "ders": "ders_adı",
+                    "doğru": sayı,
+                    "yanlış": sayı,
+                    "net": sayı,
+                    "öneriler": ["öneri1", "öneri2"],
+                    "öncelikli_konular": ["konu1", "konu2"]
+                  }
+            ],
+            "zaman_yönetimi": {
+                "problem_alanları": ["alan1", "alan2"],
+                "öneriler": ["öneri1", "öneri2"]
+            },
+            "gelecek_hedefler": [
+                  {
+                    "hedef": "hedef_açıklaması",
+                    "süre": "hedef_süresi",
+                    "strateji": "uygulama_stratejisi"
+                  }
+            ]
+          }
+          Sınav Verileri:
+        """.trimIndent(),
+        val aiResponse : AIExamAnalyzeResult? = MotikocSingleton.getAIAnalysisResult()
     )
 
     sealed class ExamEvent {
@@ -41,6 +79,8 @@ object ExamsContract {
         data class OnQuestionCountChanged(val questionCount: Int) : ExamEvent()
         data class OnQuestionTimeChanged(val questionTime: String) : ExamEvent()
         data object OnSaveExamClicked : ExamEvent()
+        data object OnLoadExams : ExamEvent()
+        data object OnAIResponseClicked : ExamEvent()
     }
 
     sealed class ExamEffect {

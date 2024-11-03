@@ -1,6 +1,7 @@
 package com.softcross.motikoc.presentation.home
 
 import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -79,7 +80,6 @@ import com.softcross.motikoc.presentation.theme.MotikocTheme
 import com.softcross.motikoc.presentation.theme.Poppins
 import com.softcross.motikoc.presentation.theme.PoppinsLight
 import com.softcross.motikoc.presentation.theme.PoppinsMedium
-import com.softcross.motikoc.presentation.theme.PrimaryGreen
 import com.softcross.motikoc.presentation.theme.PrimarySurface
 import com.softcross.motikoc.presentation.theme.TextColor
 import kotlinx.coroutines.flow.Flow
@@ -93,9 +93,7 @@ fun Home(
     uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
     navigateToIntroduce: () -> Unit,
-    navigateToPlans: () -> Unit,
-    navigateToAssignments: () -> Unit,
-    navigateToExams: () -> Unit
+    navigateToPlans: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(uiEffect, lifecycleOwner) {
@@ -173,6 +171,8 @@ fun Home(
             )
         }
     } else {
+        val user = MotikocSingleton.getUser()
+        Log.e("Home","Assignment : ${user?.assignmentHistory} \nSchedule : ${user?.schedule} \nMessage : ${user?.motivationMessage}")
         HomeContent(
             uiState = uiState,
             onFinishAssignment = { assignment ->
@@ -186,9 +186,7 @@ fun Home(
             dayList = uiState.days,
             selectedDay = uiState.selectedDay,
             plannerLoading = uiState.plannerLoading,
-            plannerItems = uiState.plannerItems,
-            navigateToAssignments = navigateToAssignments,
-            navigateToExams = navigateToExams
+            plannerItems = uiState.plannerItems
         )
     }
 }
@@ -203,9 +201,7 @@ private fun HomeContent(
     dayList: List<LocalDate>,
     selectedDay: LocalDate,
     plannerLoading: Boolean,
-    plannerItems: List<PlannerItem>,
-    navigateToAssignments: () -> Unit,
-    navigateToExams: () -> Unit
+    plannerItems: List<PlannerItem>
 ) {
     val localConfiguration = LocalConfiguration.current
     val tabList = listOf("Günlük Görevlerim", "Hedeflerim", "Rozetlerim")
@@ -278,12 +274,11 @@ private fun HomeContent(
                     onFinishAssignment = { assignment ->
                         onFinishAssignment(assignment)
                     },
-                    navigateToAssignments = navigateToAssignments
                 )
 
                 1 -> HomeGoals()
 
-                2 -> HomeRozets()
+                2 -> HomeBadges()
             }
         }
         Text(
@@ -294,7 +289,6 @@ private fun HomeContent(
             modifier = Modifier
                 .align(Alignment.Start)
                 .padding(start = 16.dp, bottom = 8.dp, top = 8.dp)
-                .clickable { navigateToExams() }
         )
         var lineCount by remember {
             mutableIntStateOf(3)
@@ -511,8 +505,7 @@ fun HomeLevelContent(
 fun HomeDailyAssignments(
     modifier: Modifier,
     assignments: List<Assignment>,
-    onFinishAssignment: (Assignment) -> Unit,
-    navigateToAssignments: () -> Unit
+    onFinishAssignment: (Assignment) -> Unit
 ) {
     LazyColumn(
         modifier,
@@ -539,7 +532,6 @@ fun HomeDailyAssignments(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .weight(2f)
-                        .clickable { navigateToAssignments() }
                 )
                 Text(
                     text = "${currentAssignment.assignmentXP} XP",
@@ -561,9 +553,7 @@ fun HomeDailyAssignments(
                 ) {
                     IconButton(
                         onClick = {
-                            if (!currentAssignment.isCompleted) {
                                 onFinishAssignment(currentAssignment)
-                            }
                         },
                         modifier = Modifier
                             .clip(CircleShape)
@@ -705,7 +695,7 @@ fun HomeGoals() {
 }
 
 @Composable
-fun HomeRozets() {
+fun HomeBadges() {
     LazyRow(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -780,7 +770,7 @@ fun HomeSelectedDayProgram(
             items(plannerItems.size, key = { plannerItems[it].id }) { index ->
                 val plannerItem = plannerItems[index]
                 val detail =
-                    if (plannerItem.questionCount.isNotEmpty()) plannerItem.questionCount else if (plannerItem.examType.isNotEmpty()) plannerItem.examType else plannerItem.workTime
+                    if (plannerItem.questionCount.isNotEmpty()) plannerItem.questionCount + " Soru" else if (plannerItem.examType.isNotEmpty()) plannerItem.examType else plannerItem.workTime
                 Row(
                     modifier = Modifier
                         .padding(vertical = 8.dp)
@@ -887,9 +877,7 @@ fun HomePreviewDark() {
             uiEffect = emptyFlow(),
             onAction = {},
             navigateToIntroduce = {},
-            navigateToPlans = {},
-            navigateToAssignments = {},
-            navigateToExams = {}
+            navigateToPlans = {}
         )
     }
 }
@@ -905,9 +893,7 @@ fun HomePreviewLight() {
             uiEffect = emptyFlow(),
             onAction = {},
             navigateToIntroduce = {},
-            navigateToPlans = {},
-            navigateToAssignments = {},
-            navigateToExams = {}
+            navigateToPlans = {}
         )
     }
 }

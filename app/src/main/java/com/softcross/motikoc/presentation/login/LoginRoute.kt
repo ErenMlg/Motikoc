@@ -61,7 +61,8 @@ fun LoginRoute(
     onAction: (UiAction) -> Unit,
     navigateToRegister: () -> Unit,
     navigateToJobWizard: () -> Unit,
-    navigateToHome: () -> Unit
+    navigateToHome: () -> Unit,
+    navigateToGoals: () -> Unit
 ) {
 
     var errorMessage by remember { mutableStateOf("") }
@@ -82,6 +83,9 @@ fun LoginRoute(
                         navigateToJobWizard()
                     }
 
+                    is UiEffect.NavigateToGoals -> {
+                        navigateToGoals()
+                    }
                 }
             }
         }
@@ -201,7 +205,8 @@ fun LoginPreviewLight() {
             onAction = {},
             navigateToRegister = {},
             navigateToJobWizard = {},
-            navigateToHome = {}
+            navigateToHome = {},
+            navigateToGoals = {}
         )
     }
 }
@@ -216,7 +221,8 @@ fun LoginPreviewDark() {
             onAction = {},
             navigateToRegister = {},
             navigateToJobWizard = {},
-            navigateToHome = {}
+            navigateToHome = {},
+            navigateToGoals = {}
         )
     }
 }

@@ -21,5 +21,6 @@ object RegisterContract {
         data class ShowSnackbar(val message: String) : UiEffect()
         data object NavigateToHome : UiEffect()
         data object NavigateToJobWizard : UiEffect()
+        data object NavigateToGoals : UiEffect()
     }
 }

@@ -25,32 +25,15 @@ import kotlin.math.round
 
 @Composable
 fun BarChart(
+    chartData: List<Pair<String,Float>>,
     modifier: Modifier = Modifier,
     height: Dp = 500.dp,
 ) {
 
-    val chartData = listOf(
-        Pair("16.08", 90),
-        Pair("II", 110),
-        Pair("III", 70),
-        Pair("IV", 205),
-        Pair("V", 150),
-        Pair("VI", 175),
-        Pair("IV", 205),
-        Pair("V", 150),
-        Pair("VI", 175),
-        Pair("IV", 205),
-        Pair("V", 150),
-        Pair("VI", 175),
-        Pair("IV", 205),
-        Pair("V", 150),
-        Pair("VI", 175)
-    )
-
     val spacingFromLeft = 0f
     val spacingFromBottom = 0f
 
-    val upperValue = remember { (chartData.maxOfOrNull { it.second }?.plus(1)) ?: 0 }
+    val upperValue = remember { (chartData.maxOfOrNull { it.second }?.plus(1)) ?: 0 }.toInt()
     val lowerValue = remember { (chartData.minOfOrNull { it.second }?.toInt() ?: 0) }
 
     val density = LocalDensity.current
@@ -69,7 +52,7 @@ fun BarChart(
             .fillMaxWidth()
             .height(height)
             .background(BackgroundColor)
-            .padding(16.dp)
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
     ) {
 
         val canvasHeight = size.height
@@ -126,7 +109,9 @@ fun BarChart(
 @Composable
 private fun Prew() {
     MotikocTheme {
-        BarChart()
+        BarChart(
+            emptyList()
+        )
     }
 }
 

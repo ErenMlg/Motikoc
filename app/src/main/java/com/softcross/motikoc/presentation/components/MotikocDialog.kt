@@ -85,7 +85,6 @@ enum class WorkType(val title: String) {
 enum class ExamType(val title: String) {
     TYT("TYT"),
     AYT("AYT"),
-    DIL("DİL");
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -202,7 +201,7 @@ fun MotikocProgramAddDialog(
                         selectedLesson.isNotBlank() &&
                         selectedTopic.isNotBlank() &&
                         selectedWorkType.isNotBlank() &&
-                        (selectedWorkType == WorkType.TEST.title && selectedQuestionCount.isNotBlank() || selectedWorkType == WorkType.LECTURE.title && selectedWorkTime.isNotBlank() || selectedWorkType == WorkType.READING.title && selectedWorkTime.isNotBlank() || selectedWorkType == WorkType.RESEARCH.title && selectedWorkTime.isNotBlank() || selectedWorkType == WorkType.EXAM.title && selectedWorkTime.isNotBlank()),
+                        (selectedWorkType == WorkType.TEST.title && selectedQuestionCount.isNotBlank() || selectedWorkType == WorkType.LECTURE.title && selectedWorkTime.isNotBlank() || selectedWorkType == WorkType.READING.title && selectedWorkTime.isNotBlank() || selectedWorkType == WorkType.RESEARCH.title && selectedWorkTime.isNotBlank() || selectedWorkType == WorkType.EXAM.title && selectedExamType.isNotBlank()),
                 modifier = Modifier
                     .padding(vertical = 8.dp),
                 onClick = {
@@ -229,14 +228,20 @@ fun ExamLessonResultDialog(
     modifier: Modifier = Modifier,
     placeHolder: String,
     title: String,
-    onSaveClick: (LessonItem) -> Unit
+    onSaveClick: (LessonItem) -> Unit,
+    maxQuestionCount: Int
 ) {
     var showDialog by remember { mutableStateOf(false) }
-    var trueCount by remember { mutableStateOf("0") }
-    var wrongCount by remember { mutableStateOf("0") }
-    var emptyCount by remember { mutableStateOf("0") }
+    var trueCount by remember { mutableIntStateOf(0) }
+    var trueText by remember { mutableStateOf("") }
+    var wrongCount by remember { mutableIntStateOf(0) }
+    var wrongText by remember { mutableStateOf("") }
+    var emptyCount by remember { mutableIntStateOf(0) }
+    var emptyText by remember { mutableStateOf("") }
+    var text by remember { mutableStateOf("") }
 
     if (showDialog) {
+
         Dialog(
             onDismissRequest = { showDialog = false }
         ) {
@@ -256,10 +261,10 @@ fun ExamLessonResultDialog(
                     fontSize = 18.sp
                 )
                 IconTextField(
-                    givenValue = trueCount.toString(),
+                    givenValue = trueText,
                     placeHolder = "Doğru Sayısı",
                     keyboardType = KeyboardType.Number,
-                    onValueChange = { trueCount = it },
+                    onValueChange = { trueCount = it.toIntOrNull() ?: 0; trueText = it },
                     leadingIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.icon_done),
@@ -270,10 +275,10 @@ fun ExamLessonResultDialog(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {}
                 IconTextField(
-                    givenValue = wrongCount.toString(),
+                    givenValue = wrongText,
                     placeHolder = "Yanlış Sayısı",
                     keyboardType = KeyboardType.Number,
-                    onValueChange = { wrongCount = it },
+                    onValueChange = { wrongCount = it.toIntOrNull() ?: 0; wrongText = it; println(maxQuestionCount.toString()) },
                     leadingIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.icon_close),
@@ -284,10 +289,10 @@ fun ExamLessonResultDialog(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {}
                 IconTextField(
-                    givenValue = emptyCount.toString(),
+                    givenValue = emptyText,
                     placeHolder = "Boş Sayısı",
                     keyboardType = KeyboardType.Number,
-                    onValueChange = { emptyCount = it },
+                    onValueChange = { emptyCount = it.toIntOrNull() ?: 0; emptyText = it },
                     leadingIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.icon_empty),
@@ -299,9 +304,9 @@ fun ExamLessonResultDialog(
                 ) {}
                 FilledButton(
                     text = "Kaydet",
-                    isEnabled = trueCount.isNotEmpty() && wrongCount.isNotEmpty() && emptyCount.isNotEmpty(),
+                    isEnabled = trueCount + wrongCount + emptyCount == maxQuestionCount,
                     modifier = Modifier
-                        .padding(top = 8.dp, bottom = 16.dp)
+                        .padding(top = 8.dp)
                         .fillMaxWidth(),
                     onClick = {
                         val lessonItem = LessonItem(
@@ -309,15 +314,26 @@ fun ExamLessonResultDialog(
                             lessonWrongCount = wrongCount.toInt(),
                             lessonEmptyCount = emptyCount.toInt()
                         )
+                        text = "D : $trueCount / Y : $wrongCount / B : $emptyCount"
                         onSaveClick(lessonItem)
                         showDialog = false
                     }
                 )
+                AnimatedVisibility(visible = trueCount + wrongCount + emptyCount != maxQuestionCount) {
+                    Text(
+                        text = "Toplam soru sayısı $maxQuestionCount olmalıdır",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 4.dp),
+                        color = TextColor,
+                    )
+
+                }
             }
         }
     }
     IconTextField(
-        givenValue = if (trueCount.isEmpty() || wrongCount.isEmpty() || emptyCount.isEmpty()) "" else "$trueCount / $wrongCount / $emptyCount",
+        givenValue = text,
         placeHolder = placeHolder,
         onValueChange = { },
         regex = String::isNotEmpty,
@@ -683,7 +699,7 @@ fun CustomDateTimePicker(
 @Composable
 private fun MotikocDialogPreview() {
     MotikocTheme {
-        ExamLessonResultDialog(Modifier, "", "", {})
+        ExamLessonResultDialog(Modifier, "", "", {}, 0)
     }
 }
 
@@ -691,6 +707,6 @@ private fun MotikocDialogPreview() {
 @Composable
 private fun MotikocDialogPreviewDark() {
     MotikocTheme(darkTheme = true) {
-        ExamLessonResultDialog(Modifier, "", "", {})
+        ExamLessonResultDialog(Modifier, "", "", {}, 0)
     }
 }

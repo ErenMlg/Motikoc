@@ -81,7 +81,7 @@ class JobAssistantViewModel @Inject constructor(
         )
         val user = firebaseRepository.getUserDetailFromFirestore()
         MotikocSingleton.setUser(user)
-        emitUiEffect(UiEffect.NavigateToHome)
+        emitUiEffect(UiEffect.NavigateToGoals)
     }
 
     private fun sendMessage() = viewModelScope.launch {

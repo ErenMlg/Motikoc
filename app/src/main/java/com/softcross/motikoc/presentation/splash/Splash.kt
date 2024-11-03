@@ -43,7 +43,8 @@ fun Splash(
     uiEffect: Flow<UiEffect>,
     navigateToMain: () -> Unit,
     navigateToIntroduce: () -> Unit,
-    navigateJobWizard: () -> Unit
+    navigateJobWizard: () -> Unit,
+    navigateToGoals: () -> Unit
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     LaunchedEffect(uiEffect, lifecycleOwner) {
@@ -53,6 +54,7 @@ fun Splash(
                     UiEffect.NavigateToIntroduce -> navigateToIntroduce()
                     UiEffect.NavigateToHome -> navigateToMain()
                     UiEffect.NavigateToJobWizard -> navigateJobWizard()
+                    UiEffect.NavigateToGoals -> navigateToGoals()
                 }
             }
         }

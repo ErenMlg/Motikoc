@@ -48,6 +48,10 @@ object JobAssistant : Destination {
     )
 }
 
+object Goals : Destination {
+    override val route = "goals"
+}
+
 object Home : Destination {
     override val route = "home"
 }

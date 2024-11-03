@@ -114,6 +114,11 @@ fun String.stringToLocalDate(pattern: String = "yyyy-MM-dd"): LocalDate {
     return LocalDate.parse(this, formatter)
 }
 
+fun LocalDate.toTurkishDateString(): String {
+    val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy", Locale("tr"))
+    return this.format(formatter)
+}
+
 fun LocalDateTime.hoursUntil(): Long {
     val localDate = LocalDateTime.now()
     return if (this.isAfter(localDate)) {

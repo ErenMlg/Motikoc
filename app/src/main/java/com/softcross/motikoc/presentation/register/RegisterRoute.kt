@@ -57,7 +57,8 @@ fun RegisterRoute(
     uiEffect: Flow<UiEffect>,
     onAction: (UiAction) -> Unit,
     navigateToLogin: () -> Unit,
-    navigateToJobWizard: () -> Unit
+    navigateToJobWizard: () -> Unit,
+    navigateToGoal: () -> Unit
 ) {
     var errorMessage by remember { mutableStateOf("") }
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -73,8 +74,12 @@ fun RegisterRoute(
                         navigateToJobWizard()
                     }
 
-                    UiEffect.NavigateToJobWizard -> {
+                    is UiEffect.NavigateToJobWizard -> {
                         navigateToJobWizard()
+                    }
+
+                    is UiEffect.NavigateToGoals -> {
+                        navigateToGoal()
                     }
                 }
             }
@@ -218,7 +223,9 @@ fun RegisterPreviewLight() {
             uiEffect = emptyFlow(),
             onAction = {},
             navigateToLogin = {},
-            navigateToJobWizard = {})
+            navigateToJobWizard = {},
+            navigateToGoal = {}
+        )
     }
 }
 
@@ -231,6 +238,8 @@ fun RegisterPreviewDark() {
             uiEffect = emptyFlow(),
             onAction = {},
             navigateToLogin = {},
-            navigateToJobWizard = {})
+            navigateToJobWizard = {},
+            navigateToGoal = {}
+        )
     }
 }

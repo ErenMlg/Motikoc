@@ -88,6 +88,6 @@ object JobSelectionContract {
 
     sealed class UiEffect {
         data class ShowSnackbar(val message: String) : UiEffect()
-        data object NavigateToHome : UiEffect()
+        data object NavigateToGoals : UiEffect()
     }
 }

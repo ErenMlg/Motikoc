@@ -4,8 +4,10 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.softcross.motikoc.common.MotikocSingleton
+import com.softcross.motikoc.common.ResponseState
 import com.softcross.motikoc.domain.model.ExamItem
 import com.softcross.motikoc.domain.repository.FirebaseRepository
+import com.softcross.motikoc.domain.repository.GeminiRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -22,7 +24,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class ExamsViewModel @Inject constructor(
-    private val firebaseRepository: FirebaseRepository
+    private val firebaseRepository: FirebaseRepository,
+    private val geminiRepository: GeminiRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExamState())
@@ -30,6 +33,10 @@ class ExamsViewModel @Inject constructor(
 
     private val _uiEffect by lazy { Channel<ExamEffect>() }
     val uiEffect: Flow<ExamEffect> by lazy { _uiEffect.receiveAsFlow() }
+
+    init {
+        getExams()
+    }
 
     fun onEvent(event: ExamEvent) {
         when (event) {
@@ -105,6 +112,57 @@ class ExamsViewModel @Inject constructor(
 
             is ExamEvent.OnSaveExamClicked -> {
                 addExamToFirebase()
+            }
+
+            is ExamEvent.OnLoadExams -> {
+                getExams()
+            }
+
+            is ExamEvent.OnAIResponseClicked -> {
+                sendAIAnalyzeRequest(uiState.value.aiPrompt)
+            }
+        }
+    }
+
+    private fun sendAIAnalyzeRequest(message: String) = viewModelScope.launch {
+        if (uiState.value.aiResponse == null && MotikocSingleton.getAIAnalysisResult() == null) {
+            geminiRepository.sendAIAnalyzeRequest(message).collect {
+                when (it) {
+                    is ResponseState.Success -> {
+                        updateUiState { copy(aiResponse = it.result, isLoading = false) }
+                        MotikocSingleton.changeAIAnalysisResult(it.result)
+                    }
+
+                    is ResponseState.Error -> {
+                        emitUiEffect(ExamEffect.ShowMessage("Bir hata oluştu"))
+                        updateUiState { copy(isLoading = false) }
+                    }
+
+                    is ResponseState.Loading -> {
+                        updateUiState { copy(isLoading = true) }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun getExams() = viewModelScope.launch {
+        if (uiState.value.exams.isEmpty() && uiState.value.requestCount == 0) {
+            updateUiState { copy(isExamsLoading = true) }
+            try {
+                val exams = firebaseRepository.getExamsFromFirestore(MotikocSingleton.getUserID())
+                if (exams != uiState.value.exams) {
+                    updateUiState {
+                        copy(
+                            exams = exams,
+                            aiPrompt = aiPrompt + exams.joinToString(",")
+                        )
+                    }
+                }
+            } catch (e: Throwable) {
+                emitUiEffect(ExamEffect.ShowMessage("Bir hata oluştu"))
+            } finally {
+                updateUiState { copy(isExamsLoading = false, requestCount = requestCount + 1) }
             }
         }
     }

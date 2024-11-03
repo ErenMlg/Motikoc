@@ -28,19 +28,23 @@ interface FirebaseRepository {
 
     suspend fun addJobToFirestore(jobTitle: String, userID: String)
 
+    suspend fun addDreamsToFirestore(userID: String, dreamUniversity: String, dreamDepartment: String, dreamPoint: String, dreamRank: String)
+
     suspend fun addPersonalInfosToFirestore(userID: String, personalProperties: String, interests: String, abilities: String, area: String, identify: String)
 
     suspend fun addAssignmentToFirestore(userID: String, assignment: Assignment) : Assignment
 
     suspend fun updateAssignmentToFirestore(userID: String, assignment: Assignment)
 
-    suspend fun addXpToUser(userID: String, totalXP: Int)
+    suspend fun changeUserXP(userID: String, totalXP: Int)
 
     suspend fun addPlanToFirestore(userID: String, plannerItem: PlannerItem)
 
-    suspend fun getPlansFromFirestore(userID: String, date:LocalDate): ResponseState<List<PlannerItem>>
+    suspend fun getPlansFromFirestore(userID: String, date:LocalDate): List<PlannerItem>
 
     suspend fun addExamToFirestore(userID: String, examItem: ExamItem)
+
+    suspend fun getExamsFromFirestore(userID: String): List<ExamItem>
 
     fun signOutUser()
 }

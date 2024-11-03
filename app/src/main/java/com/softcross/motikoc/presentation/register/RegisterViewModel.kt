@@ -56,7 +56,11 @@ class RegisterViewModel @Inject constructor(
                 if (user.dreamJob.isEmpty()) {
                     emitUiEffect(UiEffect.NavigateToJobWizard)
                 } else {
-                    emitUiEffect(UiEffect.NavigateToHome)
+                    if (user.dreamUniversity.isEmpty()){
+                        emitUiEffect(UiEffect.NavigateToGoals)
+                    } else {
+                        emitUiEffect(UiEffect.NavigateToHome)
+                    }
                 }
             }
 

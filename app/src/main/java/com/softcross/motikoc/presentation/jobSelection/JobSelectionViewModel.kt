@@ -149,7 +149,7 @@ class JobSelectionViewModel @Inject constructor(
         firebaseRepository.addJobToFirestore(job.name, MotikocSingleton.getUserID())
         val user = firebaseRepository.getUserDetailFromFirestore()
         MotikocSingleton.setUser(user)
-        emitUiEffect(UiEffect.NavigateToHome)
+        emitUiEffect(UiEffect.NavigateToGoals)
     }
 
     private fun updateUiState(block: UiState.() -> UiState) {

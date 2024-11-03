@@ -33,7 +33,11 @@ class SplashViewModel @Inject constructor(
                 if(user.dreamJob.isEmpty()){
                     emitUiEffect(SplashContract.UiEffect.NavigateToJobWizard)
                 }else{
-                    emitUiEffect(SplashContract.UiEffect.NavigateToHome)
+                    if (user.dreamUniversity.isEmpty()) {
+                        emitUiEffect(SplashContract.UiEffect.NavigateToGoals)
+                    } else {
+                        emitUiEffect(SplashContract.UiEffect.NavigateToHome)
+                    }
                 }
             } catch (e: Exception) {
                 emitUiEffect(SplashContract.UiEffect.NavigateToIntroduce)

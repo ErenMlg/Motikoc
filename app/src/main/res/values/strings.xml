@@ -27,4 +27,5 @@
     <string name="job_wizard_area">Seni daha iyi tanıyabilmemiz için hangi alana daha yatkın olduğunu belirtmeni istiyoruz.</string>
     <string name="job_wizard_identify">Sana uygun mesleği belirlemek için kendinden bahsetmene ihtiyacımız var</string>
     <string name="job_recommend_result">Verdiğiniz bilgilere göre size en uygun meslekler!</string>
+    <string name="goals">Efektif yapay zeka kullanımı için hedeflerinizi belirleyin</string>
 </resources>

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -33,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -260,12 +262,18 @@ fun PlannerScreen(
             fontSize = 24.sp,
             modifier = Modifier.padding(start = 24.dp, top = 8.dp)
         )
+
         if (selectedDayPlans.isEmpty() && !isLoading) {
-            EmptyPlanner(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .weight(1f)
-            )
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                AddPlanRow(onClick = { showDialog = true })
+                EmptyPlanner(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .weight(1f)
+                )
+            }
         } else if (isLoading) {
             LoadingPlanner(
                 modifier = Modifier
@@ -273,40 +281,71 @@ fun PlannerScreen(
                     .weight(1f)
             )
         } else {
+            val localConfiguration = LocalConfiguration.current
             LazyColumn(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .weight(1f)
+                    .height((localConfiguration.screenHeightDp * 0.4f).dp)
             ) {
-                items(selectedDayPlans.size) {
-                    PlannerItemCart(plannerItem = selectedDayPlans[it])
+                items(count = (selectedDayPlans.size + 1)) {
+                    if (it == 0) {
+                        AddPlanRow(onClick = { showDialog = true })
+                    } else {
+                        PlannerItemCart(plannerItem = selectedDayPlans[it - 1])
+                    }
                 }
             }
         }
+    }
+}
 
-
-        IconButton(
-            onClick = { showDialog = true },
-            colors = IconButtonDefaults.iconButtonColors(
-                containerColor = GoldColor,
-            ),
+@Composable
+fun AddPlanRow(
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .padding(vertical = 8.dp)
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(GoldColor)
+            .padding(2.dp)
+            .clickable {
+                onClick()
+            },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.icon_add),
+            contentDescription = "",
+            tint = DarkBackground,
             modifier = Modifier
-                .padding(16.dp)
-                .size(48.dp)
-                .align(Alignment.End)
+                .padding(8.dp)
+                .size(32.dp)
+        )
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                painter = painterResource(id = R.drawable.icon_add),
-                contentDescription = "",
-                tint = DarkBackground
+            Text(
+                text = "Yeni Plan Ekle",
+                color = DarkBackground,
+                textAlign = TextAlign.Center,
+                lineHeight = 16.sp,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
             )
         }
     }
 }
 
-
 @Composable
-fun PlannerItemCart(plannerItem: PlannerItem) {
+fun PlannerItemCart(
+    plannerItem: PlannerItem
+) {
     val detail =
         if (plannerItem.questionCount.isNotEmpty()) plannerItem.questionCount else if (plannerItem.examType.isNotEmpty()) plannerItem.examType else plannerItem.workTime
     Row(
@@ -384,7 +423,7 @@ fun EmptyPlanner(modifier: Modifier) {
 }
 
 @Composable
-fun LoadingPlanner(modifier: Modifier){
+fun LoadingPlanner(modifier: Modifier) {
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Center,

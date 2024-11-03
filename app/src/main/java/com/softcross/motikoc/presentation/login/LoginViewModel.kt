@@ -49,8 +49,15 @@ class LoginViewModel @Inject constructor(
 
             is ResponseState.Success -> {
                 MotikocSingleton.setUser(result.result)
-                if (result.result.dreamJob.isEmpty()) emitUiEffect(UiEffect.NavigateToJobWizard)
-                else emitUiEffect(UiEffect.NavigateToHome)
+                if (result.result.dreamJob.isEmpty()) {
+                    emitUiEffect(UiEffect.NavigateToJobWizard)
+                } else {
+                    if (result.result.dreamUniversity.isEmpty()) {
+                        emitUiEffect(UiEffect.NavigateToGoals)
+                    } else {
+                        emitUiEffect(UiEffect.NavigateToHome)
+                    }
+                }
             }
 
             ResponseState.Loading -> {}

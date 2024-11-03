@@ -42,7 +42,11 @@ class PlannerViewModel @Inject constructor(
                 maxDayOfMonth = getMonthMaxDay(date.year, date.monthValue)
             )
         }
-        getDayPlans()
+        if (MotikocSingleton.getUser()?.schedule?.isEmpty() == true) {
+            getDayPlans()
+        }else{
+            updatePlannerState { copy(plannerItems = MotikocSingleton.getUser()?.schedule?.filter { it.plannerDate.stringToLocalDate("MM-dd-yyyy") == date } ?: emptyList()) }
+        }
     }
 
 
@@ -97,25 +101,21 @@ class PlannerViewModel @Inject constructor(
 
     private fun getDayPlans() = viewModelScope.launch {
         updatePlannerState { copy(isLoading = true) }
-        when (val response = firebaseRepository.getPlansFromFirestore(
-            MotikocSingleton.getUserID(),
-            plannerState.value.selectedDay
-        )) {
-            is ResponseState.Error -> {
-                updatePlannerState { copy(isLoading = false) }
-                emitPlannerEffect(
-                    PlannerEffect.ShowError(
-                        response.exception.message
-                            ?: "Birşeyler yanlış gitti, lütfen tekrar deneyin"
-                    )
+        try {
+            val response = firebaseRepository.getPlansFromFirestore(
+                MotikocSingleton.getUserID(),
+                plannerState.value.selectedDay
+            )
+            updatePlannerState { copy(plannerItems = response, isLoading = false) }
+        } catch (e: Exception) {
+            updatePlannerState { copy(isLoading = false) }
+            emitPlannerEffect(
+                PlannerEffect.ShowError(
+                    e.message ?: "Birşeyler yanlış gitti, lütfen tekrar deneyin"
                 )
-            }
-
-            is ResponseState.Success -> {
-                updatePlannerState { copy(plannerItems = response.result, isLoading = false) }
-            }
-
-            is ResponseState.Loading -> {}
+            )
+        } finally {
+            updatePlannerState { copy(isLoading = false) }
         }
     }
 
@@ -125,6 +125,7 @@ class PlannerViewModel @Inject constructor(
                 MotikocSingleton.getUserID(),
                 plannerItem
             )
+            getDayPlans()
             emitPlannerEffect(PlannerEffect.ShowSuccess("Plan başarıyla eklendi."))
         } catch (e: Exception) {
             emitPlannerEffect(
